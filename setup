@@ -199,6 +199,8 @@ fi
 if type rbenv > /dev/null; then
   fancy_echo "Installing latest Ruby ..."
   rbenv install $(rbenv install -l | grep -v - | tail -1)
+  rbenv global $(rbenv install -l | grep -v - | tail -1)
+  rbenv rehash
 
   fancy_echo "Configuring bundler globally ..."
   number_of_cores=$(sysctl -n hw.ncpu)
