@@ -70,7 +70,7 @@ plugins=(
   zsh-syntax-highlighting
 )
 
-source $HOME/oh-my-zsh.sh
+source $ZSH/oh-my-zsh.sh
 
 autoload -U promptinit; promptinit
 prompt pure
