@@ -112,7 +112,7 @@ if ! [ -x "$(command -v brew)" ]; then
     export PATH="/usr/local/bin:$PATH"
 fi
 
-if [ brew list | grep -Fq brew-cask >/dev/null ]; then
+if [ brew list 2>/dev/null | grep -Fq brew-cask 2>/dev/null ]; then
   fancy_echo "Uninstalling old Homebrew-Cask ..."
   brew uninstall --force brew-cask
 fi
