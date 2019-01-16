@@ -180,6 +180,7 @@ cp com.googlecode.iterm2.plist ~/Library/Preferences
 
 if brew list | grep -Fq rbenv; then
   fancy_echo "Configuring rbenv version manager ..."
+  curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | bash
   rbenv init
   echo "Hmmmm?!?!?"
   source ~/.zshrc
