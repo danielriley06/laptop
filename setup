@@ -79,7 +79,6 @@ fancy_echo "Copying .zshrc config ..."
 rm -rf ~/.zshrc
 cp zsh-template ~/.zshrc
 update_shell
-source ~/.zshrc
 
 ###########################################################################
 ################## 3. Create .gemrc config for ruby gems ##################
@@ -208,10 +207,8 @@ rm -rf $NVM_DIR ~/.npm ~/.bower # Ensures fresh NVM install
 
 if [ command -v wget ]; then
   wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-  source ~/.zshrc
 else
   curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-  source ~/.zshrc
 fi
 
 if [ command -v nvm >/dev/null ]; then
