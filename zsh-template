@@ -72,8 +72,10 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-autoload -U promptinit; promptinit
-prompt pure
+if [ -x "$(command -v autoload)" ]; then
+  autoload -U promptinit; promptinit
+  prompt pure
+fi
 
 # User configuration
 
