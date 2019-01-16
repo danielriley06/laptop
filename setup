@@ -8,7 +8,7 @@
 ##################
 ## Script Overview
 ## Initial setup:
-## 1. Create binaries directory (.bin)
+## 1. Create installation directories
 ## 2. Installing zsh-oh-my
 ## 3. Creating basic .gemrc config for eventual ruby install
 ## 4. Installing Homebrew
@@ -58,10 +58,14 @@ update_shell() {
 }
 
 ###########################################################################
-################### 1. Create binaries directory (.bin) ###################
+################## 1. Create installation directories #####################
 
 if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
+fi
+
+if [ -d "$HOME/.rbenv/"]; then
+  rm -rf ~/.rbenv
 fi
 
 ###########################################################################
