@@ -76,7 +76,7 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
   git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 
   fancy_echo "Copying .zshrc config ..."
-  cp /zsh-template ~/.zshrc
+  cp zsh-template ~/.zshrc
 
   if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ] ; then
     update_shell
@@ -90,10 +90,10 @@ if [ ! -f "$HOME/.gemrc" ]; then
   fancy_echo "Creating empty ruby gem config dotfile ..."
   touch "$HOME/.gemrc"
   fancy_echo "Adding gem config default settings ..."
-  cp gemrc-template >> ~/.gemrc
+  cp gemrc-template ~/.gemrc
 else
   fancy_echo "Adding gem config default settings ..."
-  cp gemrc-template >> ~/.gemrc
+  cp gemrc-template ~/.gemrc
 fi
 
 ###########################################################################
