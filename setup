@@ -71,7 +71,7 @@ fi
 ###########################################################################
 ############### 2. Installing zsh-oh-my and updating shell ################
 
-if [ ! -f "$HOME/.oh-my-zsh" ]; then
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
   fancy_echo "Installing zsh-oh-my ..."
   git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 
