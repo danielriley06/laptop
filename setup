@@ -78,11 +78,8 @@ git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 fancy_echo "Copying .zshrc config ..."
 rm -rf ~/.zshrc
 cp zsh-template ~/.zshrc
+update_shell
 source ~/.zshrc
-
-if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ] ; then
-  update_shell
-fi
 
 ###########################################################################
 ################## 3. Create .gemrc config for ruby gems ##################
