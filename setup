@@ -131,6 +131,7 @@ tap "homebrew/services"
 tap "universal-ctags/universal-ctags"
 tap "caskroom/cask"
 tap "heroku/brew"
+tap "homebrew/cask-fonts"
 # Unix
 brew "universal-ctags", args: ["HEAD"]
 brew "git"
@@ -161,6 +162,7 @@ brew "rbenv"
 # VS Code
 cask "visual-studio-code"
 # iTerm2
+cask "font-fira-code"
 cask "iterm2"
 EOF
 
@@ -175,6 +177,9 @@ if [ ! which heroku | grep -Fq /usr/local/bin/heroku >/dev/null ]; then
   fancy_echo "Update heroku binary ..."
   brew link --overwrite heroku
 fi
+
+rm -rf ~/Library/Preferences/com.googlecode.iterm2.plist
+cp com.googlecode.iterm2.plist ~/Library/Preferences
 
 ###########################################################################
 ############## 7. Installing rbenv and latest version of Ruby #############
@@ -219,6 +224,8 @@ if [ command -v nvm >/dev/null ]; then
 
   fancy_echo "Installing yarn via Homebrew using nvm node install ..."
   brew install yarn --without-node
+
+  npm install --global pure-prompt
 fi
 
 fancy_echo "Development environment installation complete! 🚀"
