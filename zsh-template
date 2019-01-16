@@ -72,7 +72,7 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-if [ -x "$(command -v autoload)" ]; then
+if [ (( $+commands[autoload] )) ]; then
   autoload -U promptinit; promptinit
   prompt pure
 fi
