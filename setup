@@ -173,7 +173,7 @@ fancy_echo "Configuring zsh-syntax-highlighting ..."
 rm -rf ${HOME}/zsh-syntax-highlighting # In the event zsh-syntax-highlighting is already installed, delete directory...
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/zsh-syntax-highlighting
 
-if [ ! which heroku | grep -Fq /usr/local/bin/heroku >/dev/null ]; then
+if [ ! which heroku | grep -Fq /usr/local/bin/heroku 2>/dev/null ]; then
   fancy_echo "Update heroku binary ..."
   brew link --overwrite heroku
 fi
@@ -184,7 +184,7 @@ cp com.googlecode.iterm2.plist ~/Library/Preferences
 ###########################################################################
 ############## 7. Installing rbenv and latest version of Ruby #############
 
-if [ brew list | grep -Fq rbenv >/dev/null ]; then
+if [ brew list | grep -Fq rbenv 2>/dev/null ]; then
   fancy_echo "Configuring rbenv version manager ..."
   rbenv init
   append_to_zshrc "eval '$(rbenv init -)'"
