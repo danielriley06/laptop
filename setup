@@ -212,12 +212,12 @@ if [ ! -d "$HOME/.nvm/" ]; then
 fi
 
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-source ~/.zshrc
+source /.nvm/nvm.sh
 
 if type nvm > /dev/null; then
   fancy_echo "Installing latest Node ..."
   nvm install node
-source ~/.zshrc
+  source ~/.zshrc
   nvm use node
 
   fancy_echo "Installing yarn via Homebrew using nvm node install ..."
