@@ -23,10 +23,7 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 set -e
 
 fancy_echo() {
-  local fmt="$1"; shift
-
-  # shellcheck disable=SC2059
-  printf "\\n$fmt\\n" "$@"
+  echo $(tput bold)$(tput setaf 2) $@ $(tput sgr 0)
 }
 
 append_to_zshrc() {
@@ -212,7 +209,9 @@ rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
 
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 
-if [ type nvm &> /dev/null ]; then
+source ~/.zshrc
+
+if type nvm > /dev/null; then
   fancy_echo "Installing latest Node ..."
   nvm install node
   nvm use node
