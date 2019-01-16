@@ -234,5 +234,6 @@ if [ command -v nvm >/dev/null ]; then
 fi
 
 fancy_echo "Development environment installation complete! 🚀"
+fancy_echo "Follow steps at: https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/ to add your ssh key to github"
 
 exit 0;
