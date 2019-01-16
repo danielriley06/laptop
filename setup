@@ -185,6 +185,7 @@ cp com.googlecode.iterm2.plist ~/Library/Preferences
 if brew list | grep -Fq rbenv; then
   fancy_echo "Configuring rbenv version manager ..."
   rbenv init
+  source ~/.zshrc
 
   fancy_echo "Installing and configuring rbenv-default-gems plugin ..."
   rm -rf $HOME/.rbenv/plugins/rbenv-default-gems
