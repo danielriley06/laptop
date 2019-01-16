@@ -194,7 +194,7 @@ if brew list | grep -Fq rbenv; then
   echo "rails" >> $(rbenv root)/default-gems
 fi
 
-if [ type rbenv > /dev/null ]; then
+if type rbenv > /dev/null; then
   fancy_echo "Installing latest Ruby ..."
   rbenv install $(rbenv install -l | grep -v - | tail -1)
 
