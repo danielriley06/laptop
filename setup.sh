@@ -1,0 +1,238 @@
+#!/bin/sh
+
+# Welcome to the laptop script!
+# Be prepared to turn your laptop (or desktop, no haters here)
+# into an awesome development machine.
+# Inspired by thoughbot's similar script + some improvements
+
+##################
+## Script Overview
+## Initial setup:
+## 1. Create binaries directory (.bin)
+## 2. Installing zsh-oh-my
+## 3. Creating basic .gemrc config for eventual ruby install
+## 4. Installing Homebrew
+## 5. Installing Homebrew packages
+## 6. Homebrew packages postinstall (setup/cleanup)
+## 7. Installing rbenv and latest version of Ruby
+## . Installing NVM, latest stable Node, and Yarn
+
+# shellcheck disable=SC2154
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+
+fancy_echo() {
+  local fmt="$1"; shift
+
+  # shellcheck disable=SC2059
+  printf "\\n$fmt\\n" "$@"
+}
+
+append_to_zshrc() {
+  local text="$1" zshrc
+  local skip_new_line="${2:-0}"
+
+  if [ -w "$HOME/.zshrc.local" ]; then
+    zshrc="$HOME/.zshrc.local"
+  else
+    zshrc="$HOME/.zshrc"
+  fi
+
+  if ! grep -Fqs "$text" "$zshrc"; then
+    if [ "$skip_new_line" -eq 1 ]; then
+      printf "%s\\n" "$text" >> "$zshrc"
+    else
+      printf "\\n%s\\n" "$text" >> "$zshrc"
+    fi
+  fi
+}
+
+update_shell() {
+  local shell_path;
+  shell_path="$(command -v zsh)"
+
+  fancy_echo "Changing your shell to zsh ..."
+  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
+    fancy_echo "Adding '$shell_path' to /etc/shells"
+    sudo sh -c "echo $shell_path >> /etc/shells"
+  fi
+  sudo chsh -s "$shell_path" "$USER"
+}
+
+###########################################################################
+################### 1. Create binaries directory (.bin) ###################
+
+if [ ! -d "$HOME/.bin/" ]; then
+  mkdir "$HOME/.bin"
+fi
+
+
+###########################################################################
+############### 2. Installing zsh-oh-my and updating shell ################
+
+if [ ! -f "$HOME/.zshrc" ]; then
+  fancy_echo "Installing zsh-oh-my ..."
+  git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+
+  fancy_echo "Copying .zshrc config ..."
+  cp /zsh-template ~/.zshrc
+
+  if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ] ; then
+    update_shell
+  fi
+fi
+
+###########################################################################
+################## 3. Create .gemrc config for ruby gems ##################
+
+gem_config="
+# http://docs.rubygems.org/read/chapter/11
+--- 
+gem: --no-ri --no-rdoc
+benchmark: false
+verbose: true
+update_sources: true
+sources: 
+- http://gems.rubyforge.org/
+- http://rubygems.org/
+backtrace: true
+bulk_threshold: 1000
+"
+
+if [ ! -f "$HOME/.gemrc" ]; then
+  fancy_echo "Creating empty ruby gem config dotfile ..."
+  touch "$HOME/.gemrc"
+  fancy_echo "Adding gem config default settings ..."
+  printf "$gem_config" >> ~/.gemrc
+else
+  fancy_echo "Adding gem config default settings ..."
+  printf "$gem_config" >> ~/.gemrc
+fi
+
+###########################################################################
+########################## 4. Installing Homebrew #########################
+
+if [ ! command -v brew >/dev/null ]; then
+  fancy_echo "Installing Homebrew ..."
+    curl -fsS \
+      'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
+
+    append_to_zshrc '# recommended by brew doctor'
+
+    # shellcheck disable=SC2016
+    append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
+
+    export PATH="/usr/local/bin:$PATH"
+fi
+
+if [ brew list | grep -Fq brew-cask ]; then
+  fancy_echo "Uninstalling old Homebrew-Cask ..."
+  brew uninstall --force brew-cask
+fi
+
+###########################################################################
+###################### 5. Installing Homebrew packages ####################
+
+fancy_echo "Updating Homebrew formulae ..."
+brew update --force # https://github.com/Homebrew/brew/issues/1151
+brew bundle --file=- <<EOF
+tap "thoughtbot/formulae"
+tap "homebrew/services"
+tap "universal-ctags/universal-ctags"
+tap "caskroom/cask"
+tap "heroku/brew"
+# Unix
+brew "universal-ctags", args: ["HEAD"]
+brew "git"
+brew "openssl"
+brew "rcm"
+brew "reattach-to-user-namespace"
+brew "the_silver_searcher"
+brew "tmux"
+brew "vim"
+brew "watchman"
+brew "zsh"
+# Heroku
+brew "heroku/brew/heroku"
+brew "parity"
+# GitHub
+brew "hub"
+# Image manipulation
+brew "imagemagick"
+# Programming language prerequisites and package managers
+brew "libyaml" # should come after openssl
+brew "coreutils"
+cask "gpg-suite"
+# Databases
+brew "postgres", restart_service: :changed
+brew "redis", restart_service: :changed
+# Ruby Version Manager
+brew "rbenv"
+# VS Code
+cask "visual-studio-code"
+# iTerm2
+cask "iterm2"
+EOF
+
+###########################################################################
+###################### 6. Homebrew package postinstall ####################
+
+fancy_echo "Configuring zsh-syntax-highlighting ..."
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
+echo "source ${(q-)PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc
+source ./zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+if [ ! which heroku | grep -Fq /usr/local/bin/heroku ]; then
+  fancy_echo "Update heroku binary ..."
+  brew link --overwrite heroku
+fi
+
+###########################################################################
+############## 7. Installing rbenv and latest version of Ruby #############
+
+if [ brew list | grep -Fq rbenv ]; then
+  fancy_echo "Configuring rbenv version manager ..."
+  rbenv init
+  append_to_zshrc "eval '$(rbenv init -)'"
+  source ~/.zshrc
+  fancy_echo "Installing and configuring rbenv-default-gems plugin ..."
+  git clone https://github.com/rbenv/rbenv-default-gems.git $(rbenv root)/plugins/rbenv-default-gems
+  touch $(rbenv root)/default-gems
+  echo "bundler" >> $(rbenv root)/default-gems
+  echo "rails" >> $(rbenv root)/default-gems
+fi
+
+if [ command -v rbenv >/dev/null ]; then
+  fancy_echo "Installing latest Ruby ..."
+  rbenv install $(rbenv install -l | grep -v - | tail -1)
+
+  fancy_echo "Configuring bundler globally ..."
+  number_of_cores=$(sysctl -n hw.ncpu)
+  bundle config --global jobs $((number_of_cores - 1))
+fi
+
+###########################################################################
+############# 8. Installing NVM, latest stable Node, and Yarn #############
+
+fancy_echo "Installing latest Node ..."
+if [ command -v wget ]; then
+  wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+  source ~/.zshrc
+else
+  curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+  source ~/.zshrc
+fi
+
+if [ command -v nvm >/dev/null ]; then
+  fancy_echo "Installing latest Node ..."
+  nvm install node
+  nvm use node
+
+  fancy_echo "Installing yarn via Homebrew using nvm node install ..."
+  brew install yarn --without-node
+fi
+
+fancy_echo "Development environment installation complete! 🚀"
+
+exit 0;
