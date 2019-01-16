@@ -224,6 +224,8 @@ if type nvm > /dev/null; then
   brew install yarn --without-node
 
   npm install --global pure-prompt
+  append_to_zshrc "autoload -U promptinit; promptinit"
+  append_to_zshrc "prompt pure"
 else
   fancy_echo "nvm command not found!"
 fi
