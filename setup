@@ -217,6 +217,7 @@ source ~/.zshrc
 if type nvm > /dev/null; then
   fancy_echo "Installing latest Node ..."
   nvm install node
+source ~/.zshrc
   nvm use node
 
   fancy_echo "Installing yarn via Homebrew using nvm node install ..."
