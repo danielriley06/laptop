@@ -67,6 +67,9 @@ if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
 fi
 
+if [ ! -d "$HOME/.nvm/" ]; then
+  mkdir "$HOME/.nvm"
+fi
 
 ###########################################################################
 ############### 2. Installing zsh-oh-my and updating shell ################
