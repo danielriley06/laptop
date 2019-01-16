@@ -78,6 +78,7 @@ git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 fancy_echo "Copying .zshrc config ..."
 rm -rf ~/.zshrc
 cp zsh-template ~/.zshrc
+source ~/.zshrc
 
 if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ] ; then
   update_shell
@@ -206,6 +207,8 @@ fi
 ############# 8. Installing NVM, latest stable Node, and Yarn #############
 
 fancy_echo "Installing latest Node ..."
+rm -rf $NVM_DIR ~/.npm ~/.bower # Ensures fresh NVM install
+
 if [ command -v wget ]; then
   wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
   source ~/.zshrc
