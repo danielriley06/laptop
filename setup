@@ -179,11 +179,8 @@ cp com.googlecode.iterm2.plist ~/Library/Preferences
 ############## 7. Installing rbenv and latest version of Ruby #############
 
 if brew list | grep -Fq rbenv; then
-  fancy_echo "Configuring rbenv version manager ..."
+  fancy_echo "Validating rbenv install ..."
   curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | bash
-  rbenv init
-  echo "Hmmmm?!?!?"
-  source ~/.zshrc
 
   fancy_echo "Installing and configuring rbenv-default-gems plugin ..."
   rm -rf $HOME/.rbenv/plugins/rbenv-default-gems
