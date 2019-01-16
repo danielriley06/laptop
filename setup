@@ -168,7 +168,7 @@ fancy_echo "Configuring zsh-syntax-highlighting ..."
 rm -rf ${HOME}/zsh-syntax-highlighting # In the event zsh-syntax-highlighting is already installed, delete directory...
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/zsh-syntax-highlighting
 
-if [ ! which heroku | grep -Fq /usr/local/bin/heroku 2>/dev/null ]; then
+if ! [ which heroku | grep -Fq /usr/local/bin/heroku &> /dev/null ]; then
   fancy_echo "Update heroku binary ..."
   brew link --overwrite heroku
 fi
@@ -179,7 +179,7 @@ cp com.googlecode.iterm2.plist ~/Library/Preferences
 ###########################################################################
 ############## 7. Installing rbenv and latest version of Ruby #############
 
-if [ brew list | grep -Fq rbenv 2>/dev/null ]; then
+if [ brew list | grep -Fq rbenv &> /dev/null ]; then
   fancy_echo "Configuring rbenv version manager ..."
   rbenv init
   append_to_zshrc "eval '$(rbenv init -)'"
@@ -191,13 +191,15 @@ if [ brew list | grep -Fq rbenv 2>/dev/null ]; then
   echo "rails" >> $(rbenv root)/default-gems
 fi
 
-if [ command -v rbenv >/dev/null ]; then
+if [ type rbenv &> /dev/null ]; then
   fancy_echo "Installing latest Ruby ..."
   rbenv install $(rbenv install -l | grep -v - | tail -1)
 
   fancy_echo "Configuring bundler globally ..."
   number_of_cores=$(sysctl -n hw.ncpu)
   bundle config --global jobs $((number_of_cores - 1))
+else
+  fancy_echo "rbenv command not found!"
 fi
 
 ###########################################################################
@@ -210,7 +212,7 @@ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | b
 
 source ~/.zshrc
 
-if [ command -v npm >/dev/null 2>&1 ]; then
+if [ type nvm &> /dev/null ]; then
   fancy_echo "Installing latest Node ..."
   nvm install node
   nvm use node
