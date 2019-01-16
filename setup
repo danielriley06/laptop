@@ -64,10 +64,6 @@ if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
 fi
 
-if [ ! -d "$HOME/.nvm/" ]; then
-  mkdir "$HOME/.nvm"
-fi
-
 ###########################################################################
 ############### 2. Installing zsh-oh-my and updating shell ################
 
@@ -207,9 +203,11 @@ fi
 fancy_echo "Installing latest Node ..."
 rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
 
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+if [ ! -d "$HOME/.nvm/" ]; then
+  mkdir "$HOME/.nvm"
+fi
 
-source ~/.zshrc
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 
 if type nvm > /dev/null; then
   fancy_echo "Installing latest Node ..."
