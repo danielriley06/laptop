@@ -182,7 +182,7 @@ cp com.googlecode.iterm2.plist ~/Library/Preferences
 ###########################################################################
 ############## 7. Installing rbenv and latest version of Ruby #############
 
-if [ brew list | grep -Fq rbenv >/dev/null ]; then
+if brew list | grep -Fq rbenv; then
   fancy_echo "Configuring rbenv version manager ..."
   rbenv init
   append_to_zshrc "eval '$(rbenv init -)'"
@@ -194,7 +194,7 @@ if [ brew list | grep -Fq rbenv >/dev/null ]; then
   echo "rails" >> $(rbenv root)/default-gems
 fi
 
-if [ type rbenv &> /dev/null ]; then
+if [ type rbenv > /dev/null ]; then
   fancy_echo "Installing latest Ruby ..."
   rbenv install $(rbenv install -l | grep -v - | tail -1)
 
