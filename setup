@@ -112,7 +112,7 @@ if ! [ -x "$(command -v brew)" ]; then
     export PATH="/usr/local/bin:$PATH"
 fi
 
-if [ brew list | grep -Fq brew-cask ]; then
+if [ brew list | grep -Fq brew-cask >/dev/null ]; then
   fancy_echo "Uninstalling old Homebrew-Cask ..."
   brew uninstall --force brew-cask
 fi
@@ -165,11 +165,11 @@ EOF
 ###################### 6. Homebrew package postinstall ####################
 
 fancy_echo "Configuring zsh-syntax-highlighting ..."
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
-echo "source ${(q-)PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc
-source ./zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/zsh-syntax-highlighting
+echo "source ${HOME}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${HOME}/.zshrc
+source ${HOME}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-if [ ! which heroku | grep -Fq /usr/local/bin/heroku ]; then
+if [ ! which heroku | grep -Fq /usr/local/bin/heroku >/dev/null ]; then
   fancy_echo "Update heroku binary ..."
   brew link --overwrite heroku
 fi
@@ -177,7 +177,7 @@ fi
 ###########################################################################
 ############## 7. Installing rbenv and latest version of Ruby #############
 
-if [ brew list | grep -Fq rbenv ]; then
+if [ brew list | grep -Fq rbenv >/dev/null ]; then
   fancy_echo "Configuring rbenv version manager ..."
   rbenv init
   append_to_zshrc "eval '$(rbenv init -)'"
