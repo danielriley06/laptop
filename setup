@@ -71,15 +71,12 @@ fi
 ###########################################################################
 ############### 2. Installing zsh-oh-my and updating shell ################
 
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  fancy_echo "Installing zsh-oh-my ..."
-  git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
-
-  fancy_echo "Copying .zshrc config ..."
-  cp zsh-template ~/.zshrc
-fi
+fancy_echo "Installing zsh-oh-my ..."
+rm -rf ~/.oh-my-zsh
+git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 
 fancy_echo "Copying .zshrc config ..."
+rm -rf ~/.zshrc
 cp zsh-template ~/.zshrc
 
 if [ "$(command -v zsh)" != '/usr/local/bin/zsh' ] ; then
