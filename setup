@@ -60,43 +60,14 @@ update_shell() {
   sudo chsh -s "$shell_path" "$USER"
 }
 
-OPTIONS=(1 "Node"
-         2 "Yarn"
-         3 "Rust"
-         4 "Python2"
-         5 "Python3"
-         6 "Go")
-
 #Menu options
-options[0]="AAA"
-options[1]="BBB"
-options[2]="CCC"
-options[3]="DDD"
-options[4]="EEE"
-
-#Actions to take based on selection
-function ACTIONS {
-    if [[ ${choices[0]} ]]; then
-        #Option 1 selected
-        echo "Option 1 selected"
-    fi
-    if [[ ${choices[1]} ]]; then
-        #Option 2 selected
-        echo "Option 2 selected"
-    fi
-    if [[ ${choices[2]} ]]; then
-        #Option 3 selected
-        echo "Option 3 selected"
-    fi
-    if [[ ${choices[3]} ]]; then
-        #Option 4 selected
-        echo "Option 4 selected"
-    fi
-    if [[ ${choices[4]} ]]; then
-        #Option 5 selected
-        echo "Option 5 selected"
-    fi
-}
+options[0]="Ruby"
+options[1]="Node/Yarn"
+options[2]="Java"
+options[3]="Rust"
+options[4]="Python2"
+options[5]="Python3"
+options[6]="Go"
 
 #Variables
 ERROR=" "
@@ -226,9 +197,6 @@ cask "gpg-suite"
 # Databases
 brew "postgres", restart_service: :changed
 brew "redis", restart_service: :changed
-# Ruby Version Manager
-brew "rbenv"
-brew "ruby-build"
 # VS Code
 cask "visual-studio-code"
 # iTerm2
@@ -247,60 +215,85 @@ rm -rf ${HOME}/zsh-syntax-highlighting # In the event zsh-syntax-highlighting is
 rm -rf ~/Library/Preferences/com.googlecode.iterm2.plist
 cp com.googlecode.iterm2.plist ~/Library/Preferences
 
-###########################################################################
-############## 7. Installing rbenv and latest version of Ruby #############
+#Actions to take based on selection
+function ACTIONS {
+    if [[ ${choices[0]} ]]; then
+        fancy_echo "Installing rbenv..."
+        [brew install rbenv] &>/dev/null
+        fancy_echo "Validating rbenv install ..."
+        curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | bash
 
-if brew list | grep -Fq rbenv; then
-  fancy_echo "Validating rbenv install ..."
-  curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | bash
+        fancy_echo "Installing and configuring rbenv-default-gems plugin ..."
+        rm -rf $HOME/.rbenv/plugins/rbenv-default-gems
+        rm -rf $HOME/.rbenv/default-gems
+        git clone https://github.com/rbenv/rbenv-default-gems.git $HOME/.rbenv/plugins/rbenv-default-gems
+        touch $HOME/.rbenv/default-gems
+        echo "bundler" >> $HOME/.rbenv/default-gems
+        echo "rails" >> $HOME/.rbenv/default-gems
 
-  fancy_echo "Installing and configuring rbenv-default-gems plugin ..."
-  rm -rf $HOME/.rbenv/plugins/rbenv-default-gems
-  rm -rf $HOME/.rbenv/default-gems
-  git clone https://github.com/rbenv/rbenv-default-gems.git $HOME/.rbenv/plugins/rbenv-default-gems
-  touch $HOME/.rbenv/default-gems
-  echo "bundler" >> $HOME/.rbenv/default-gems
-  echo "rails" >> $HOME/.rbenv/default-gems
-fi
+        if type rbenv > /dev/null; then
+          fancy_echo "Installing latest Ruby release (v$(rbenv install -l | grep -v - | tail -1))..."
+          rbenv install $(rbenv install -l | grep -v - | tail -1)
+          ret_code=$?
+          rbenv global $(rbenv install -l | grep -v - | tail -1)
+          rbenv rehash
 
-if type rbenv > /dev/null; then
-  fancy_echo "Installing latest Ruby release (v$(rbenv install -l | grep -v - | tail -1))..."
-  rbenv install $(rbenv install -l | grep -v - | tail -1)
-  ret_code=$?
-  rbenv global $(rbenv install -l | grep -v - | tail -1)
-  rbenv rehash
+          fancy_echo "Configuring bundler globally ..."
+          number_of_cores=$(sysctl -n hw.ncpu)
+          bundle config --global jobs $((number_of_cores - 1))
+        else
+          fancy_echo "rbenv command not found!"
+        fi
+    fi
+    if [[ ${choices[1]} ]]; then
+        fancy_echo "Installing NVM..."
+        rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
 
-  fancy_echo "Configuring bundler globally ..."
-  number_of_cores=$(sysctl -n hw.ncpu)
-  bundle config --global jobs $((number_of_cores - 1))
-else
-  fancy_echo "rbenv command not found!"
-fi
+        mkdir "$HOME/.nvm/"
 
-###########################################################################
-############# 8. Installing NVM, latest stable Node, and Yarn #############
+        curl -s -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+        source ~/.nvm/nvm.sh
 
-fancy_echo "Installing latest Node ..."
-rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
+        if type nvm > /dev/null; then
+          fancy_echo "Installing Node..."
+          [nvm install node] &>/dev/null
 
-mkdir "$HOME/.nvm/"
+          fancy_echo "Installing yarn via Homebrew using nvm node install ..."
+          [brew install yarn --without-node] &>/dev/null
 
-curl -s -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
-source ~/.nvm/nvm.sh
-
-if type nvm > /dev/null; then
-  fancy_echo "Installing latest Node ..."
-  [nvm install node] &>/dev/null
-
-  fancy_echo "Installing yarn via Homebrew using nvm node install ..."
-  [brew install yarn --without-node] &>/dev/null
-
-  [npm install --global pure-prompt] &>/dev/null
-  append_to_zshrc "autoload -U promptinit; promptinit"
-  append_to_zshrc "prompt pure"
-else
-  fancy_echo "nvm command not found!"
-fi
+          fancy_echo "Installing Pure prompt..."
+          [npm install --global pure-prompt] &>/dev/null
+          append_to_zshrc "autoload -U promptinit; promptinit"
+          append_to_zshrc "prompt pure"
+        else
+          fancy_echo "nvm command not found!"
+        fi
+    fi
+    if [[ ${choices[2]} ]]; then
+        #Option 2 selected
+        fancy_echo "Installing Java..."
+        brew cask install java
+    fi
+    if [[ ${choices[3]} ]]; then
+        #Option 3 selected
+        fancy_echo "Installing Rust..."
+        curl https://sh.rustup.rs -sSf | sh
+    fi
+    if [[ ${choices[3]} ]]; then
+        #Option 4 selected
+        fancy_echo "Installing Python2..."
+        brew install python@2
+    fi
+    if [[ ${choices[4]} ]]; then
+        #Option 5 selected
+        fancy_echo "Installing Python3..."
+        brew install python
+    fi
+    if [[ ${choices[5]} ]]; then
+        fancy_echo "Installing Golang..."
+        brew install golang
+    fi
+}
 
 fancy_echo "Development environment installation complete! 🚀"
 fancy_echo "Follow steps at: https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/ to add your ssh key to github"
