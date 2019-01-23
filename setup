@@ -20,6 +20,11 @@
 # shellcheck disable=SC2154
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
+
+shw_err ()  {
+    echo $(tput bold)$(tput setaf 1) $@ $(tput sgr 0)
+}
+
 fancy_echo() {
   echo $(tput bold)$(tput setaf 2) $@ $(tput sgr 0)
 }
@@ -210,7 +215,7 @@ rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
 
 mkdir "$HOME/.nvm/"
 
-[curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash] &>/dev/null
+curl -s -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 source ~/.nvm/nvm.sh
 
 if type nvm > /dev/null; then
