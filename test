@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# while-menu: a menu-driven system information program
+
+TERMINAL=$(tty)
+
+HEIGHT=15
+WIDTH=40
+CHOICE_HEIGHT=4
+BACKTITLE="Backtitle here"
+TITLE="Title here"
+MENU="Choose one of the following options:"
+
+OPTIONS=(
+  1 "Ruby"      off
+  2 "Node/Yarn" off
+  3 "Rust"      off
+  4 "Python2"   off
+  5 "Python3"   off
+  6 "Go"        off
+  7 "Java"      off
+)
+
+CHOICES=$(dialog --shadow \
+                --stdout \
+                --separate-output \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --checklist "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}")
+EXIT_CODE=$?
+
+# handle escape / cancel buttons
+if [ "1" = "$EXIT_CODE" ] ; then
+  clear
+  echo "Cancelled..."
+  echo "Development environment installation complete! 🚀"
+  exit 1;
+fi
+
+if [ "255" = "$EXIT_CODE" ] ; then
+  clear
+  echo "Cancelled..."
+  echo "Development environment installation complete! 🚀"
+  exit 1;
+fi
+
+if [[ -z "$CHOICES" ]]; then
+  clear
+  echo "No options were selected..."
+  echo "Development environment installation complete! 🚀"
+  exit 1;
+else
+  for choice in $CHOICES
+  do
+      case $choice in
+          1)
+              install_rbenv
+              ;;
+          2)
+              install_node
+              ;;
+          3)
+              echo "Installing Rust..."
+              curl https://sh.rustup.rs -sSf | sh
+              ;;
+          4)
+              echo "Installing Python2..."
+              brew install python@2
+              ;;
+          5)
+              echo "Installing Pythong3..."
+              brew install python
+              ;;
+          6)
+              echo "Installing Golang..."
+              brew install golang
+              ;;
+          7)
+              echo "Installing Java..."
+              brew cask install java
+              ;;
+          *)
+              echo "No options selected... Development environment installation complete! 🚀"
+              ;;
+      esac
+  done
+fi
