@@ -196,7 +196,6 @@ if type rbenv > /dev/null; then
   fancy_echo "Installing latest Ruby release (v$(rbenv install -l | grep -v - | tail -1))..."
   rbenv install $(rbenv install -l | grep -v - | tail -1)
   ret_code=$?
-  echo "You selected: $ret_code"
   rbenv global $(rbenv install -l | grep -v - | tail -1)
   rbenv rehash
 
