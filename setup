@@ -17,36 +17,6 @@
 ## 7. Installing selected optional packages and applications
 ## . Installing NVM, latest stable Node, and Yarn
 
-TERMINAL=$(tty)
-
-HEIGHT=15
-WIDTH=40
-CHOICE_HEIGHT=10
-TITLE="macOS Development Environment Installer"
-MENU="Select one or more options with <space> :"
-
-OPTIONS=(
-  1 "rbenv/Ruby/Rails"      on
-  2 "Node/Yarn" on
-  3 "Rust"      off
-  4 "Python2"   off
-  5 "Python3"   off
-  6 "Go"        off
-  7 "Java"      off
-  8 "iTerm2"    off
-)
-
-CHOICES=$(dialog --shadow \
-                --cancel-label "Exit" \
-                --stdout \
-                --separate-output \
-                --backtitle "$BACKTITLE" \
-                --title "$TITLE" \
-                --checklist "$MENU" \
-                $HEIGHT $WIDTH $CHOICE_HEIGHT \
-                "${OPTIONS[@]}")
-EXIT_CODE=$?
-
 # shellcheck disable=SC2154
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
@@ -162,7 +132,6 @@ fi
 ###########################################################################
 ############### 2. Installing zsh-oh-my and updating shell ################
 
-clear
 fancy_echo "Installing zsh-oh-my ..."
 rm -rf ~/.oh-my-zsh
 git clone -q https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
@@ -219,6 +188,7 @@ tap "caskroom/cask"
 tap "heroku/brew"
 tap "homebrew/cask-fonts"
 # Unix
+brew "dialog"
 brew "universal-ctags", args: ["HEAD"]
 brew "git"
 brew "openssl"
@@ -261,7 +231,37 @@ git clone -q -b develop https://github.com/zsh-users/zsh-autosuggestions ~/.zsh/
 #############################################################################
 ######### 7. Installing selected optional packages and applications #########
 
-clear
+
+TERMINAL=$(tty)
+
+HEIGHT=15
+WIDTH=40
+CHOICE_HEIGHT=10
+TITLE="macOS Development Environment Installer"
+MENU="Select one or more options with <space> :"
+
+OPTIONS=(
+  1 "rbenv/Ruby/Rails"      on
+  2 "Node/Yarn" on
+  3 "Rust"      off
+  4 "Python2"   off
+  5 "Python3"   off
+  6 "Go"        off
+  7 "Java"      off
+  8 "iTerm2"    off
+)
+
+CHOICES=$(dialog --shadow \
+                --cancel-label "Exit" \
+                --stdout \
+                --separate-output \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --checklist "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}")
+EXIT_CODE=$?
+
 if [ "1" = "$EXIT_CODE" ] ; then
   clear
   echo "Cancelled..."
