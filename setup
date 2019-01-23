@@ -279,7 +279,7 @@ HEIGHT=30
 WIDTH=80
 CHOICE_HEIGHT=15
 TITLE="macOS Development Environment Installer"
-MENU="Select one or more options with <space> :"
+MENU="Select one or more options with SPACE and confirm with TAB:"
 
 OPTIONS=(
   1 "Ruby"        on
