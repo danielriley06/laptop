@@ -207,7 +207,7 @@ fi
 fancy_echo "Installing latest Node ..."
 rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
 
-if [ ! -d "$HOME/.nvm/" ]; then
+if [ ! -d "$HOME/.nvm" ]; then
   mkdir "$HOME/.nvm"
 fi
 
@@ -223,9 +223,9 @@ if type nvm > /dev/null; then
   fancy_echo "Installing yarn via Homebrew using nvm node install ..."
   brew install yarn --without-node
 
-  npm install --global pure-prompt
-  append_to_zshrc "autoload -U promptinit; promptinit"
-  append_to_zshrc "prompt pure"
+  #npm install --global pure-prompt
+  #append_to_zshrc "autoload -U promptinit; promptinit"
+  #append_to_zshrc "prompt pure"
 else
   fancy_echo "nvm command not found!"
 fi
