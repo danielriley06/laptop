@@ -165,7 +165,8 @@ EOF
 
 fancy_echo "Configuring zsh-syntax-highlighting ..."
 rm -rf ${HOME}/zsh-syntax-highlighting # In the event zsh-syntax-highlighting is already installed, delete directory...
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/zsh-syntax-highlighting
+
+[git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/zsh-syntax-highlighting] &>/dev/null
 
 rm -rf ~/Library/Preferences/com.googlecode.iterm2.plist
 cp com.googlecode.iterm2.plist ~/Library/Preferences
