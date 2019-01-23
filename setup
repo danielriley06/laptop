@@ -100,7 +100,8 @@ fancy_logo() {
   ${PURPLE# }      ####################         ${fieldlist[10]}
   ${BLUE#   }        ################           ${fieldlist[11]}
   ${BLUE#   }         ####     #####            ${fieldlist[12]}
-  ${normal}
+  \n\n
+  ${normal}macOS Development Environment Installer
   "
 }
 
@@ -289,7 +290,7 @@ OPTIONS=(
   7 "Go"          off
   8 "Java"        off
   9 "iTerm2"      off
-  10 "VS Code"     off
+  10 "VS Code"    off
 )
 
 CHOICES=$(whiptail --cancel-button "Exit" \
@@ -336,7 +337,7 @@ else
           ;;
       4)
           fancy_echo "Installing Rust..."
-          [ curl https://sh.rustup.rs -sSf | sh ] &>/dev/null
+          curl https://sh.rustup.rs -sSf | sh &>/dev/null
           ;;
       5)
           fancy_echo "Installing Python2..."
@@ -368,5 +369,5 @@ else
   done
 fi
 
-fancy_echo "Development environment installation complete! 🚀"
 fancy_echo "Follow steps at: https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/ to add your ssh key to github"
+fancy_echo "Development environment installation complete! 🚀"
