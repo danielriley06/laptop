@@ -207,9 +207,7 @@ fi
 fancy_echo "Installing latest Node ..."
 rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
 
-if [ ! -d "$HOME/.nvm" ]; then
-  mkdir "$HOME/.nvm"
-fi
+mkdir "$HOME/.nvm/"
 
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
 source ~/.nvm/nvm.sh
