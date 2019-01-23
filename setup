@@ -127,12 +127,12 @@ update_shell() {
   local shell_path;
   shell_path="$(command -v zsh)"
 
-  fancy_echo "Changing your shell to zsh ..."
+  fancy_echo "Changing your shell to zsh..."
   if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
     fancy_echo "Adding '$shell_path' to /etc/shells"
     sudo sh -c "echo $shell_path >> /etc/shells"
   fi
-  sudo chsh -s "$shell_path" "$USER"
+  sudo chsh -s "$shell_path" "$USER" &1>/dev/null
 }
 
 # Install rbenv & rbenv-default-gems
@@ -140,27 +140,25 @@ update_shell() {
 install_rbenv() {
   fancy_echo "Installing rbenv..."
   [brew install rbenv] &>/dev/null
-  fancy_echo "Validating rbenv install ..."
-  curl -s -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | bash
+  fancy_echo "Validating rbenv install..."
+  curl -s -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | bash &>/dev/null
 
-  fancy_echo "Installing and configuring rbenv-default-gems plugin ..."
+  fancy_echo "Installing and configuring rbenv-default-gems plugin..."
   rm -rf $HOME/.rbenv/plugins/rbenv-default-gems
   rm -rf $HOME/.rbenv/default-gems
-  git clone https://github.com/rbenv/rbenv-default-gems.git $HOME/.rbenv/plugins/rbenv-default-gems
+  git clone https://github.com/rbenv/rbenv-default-gems.git $HOME/.rbenv/plugins/rbenv-default-gems &>/dev/null
   touch $HOME/.rbenv/default-gems
   echo "bundler" >> $HOME/.rbenv/default-gems
   echo "rails" >> $HOME/.rbenv/default-gems
 
   if type rbenv > /dev/null; then
     fancy_echo "Installing latest Ruby release (v$(rbenv install -l | grep -v - | tail -1))..."
-    rbenv install $(rbenv install -l | grep -v - | tail -1)
+    rbenv install $(rbenv install -l | grep -v - | tail -1) &>/dev/null
     ret_code=$?
     rbenv global $(rbenv install -l | grep -v - | tail -1)
     rbenv rehash
 
-    source ~/.gemrc
-
-    fancy_echo "Configuring bundler globally ..."
+    fancy_echo "Configuring bundler globally..."
     number_of_cores=$(sysctl -n hw.ncpu)
     bundle config --global jobs $((number_of_cores - 1))
   else
@@ -186,7 +184,7 @@ install_node() {
     fancy_echo "Installing Node..."
     nvm install node &> /dev/null
 
-    fancy_echo "Installing Yarn via Homebrew using nvm node install ..."
+    fancy_echo "Installing Yarn via Homebrew using nvm node install..."
     [ brew install yarn --without-node ] &>/dev/null
 
     fancy_echo "Installing Pure prompt..."
@@ -213,21 +211,21 @@ fi
 ###########################################################################
 ################## 3. Create .gemrc config for ruby gems ##################
 
-if [ ! -f "$HOME/.gemrc" ]; then
-  fancy_echo "Creating empty ruby gem config dotfile ..."
-  touch "$HOME/.gemrc"
-  fancy_echo "Adding gem config default settings ..."
-  cp gemrc-template ~/.gemrc
-else
-  fancy_echo "Adding gem config default settings ..."
-  cp gemrc-template ~/.gemrc
-fi
+  if [ ! -f "$HOME/.gemrc" ]; then
+    fancy_echo "Creating empty ruby gem config dotfile..."
+    touch "$HOME/.gemrc"
+    fancy_echo "Adding gem config default settings..."
+    cp gemrc-template ~/.gemrc
+  else
+    fancy_echo "Adding gem config default settings..."
+    cp gemrc-template ~/.gemrc
+  fi
 
 ###########################################################################
 ########################## 4. Installing Homebrew #########################
 
 if ! [ -x "$(command -v brew)" ]; then
-  fancy_echo "Installing Homebrew ..."
+  fancy_echo "Installing Homebrew..."
     curl -fsS 'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby &>/dev/null
 
     append_to_zshrc '# recommended by brew doctor'
@@ -239,14 +237,14 @@ if ! [ -x "$(command -v brew)" ]; then
 fi
 
 if [ brew list &>/dev/null | grep -Fq brew-cask &>/dev/null ]; then
-  fancy_echo "Uninstalling old Homebrew-Cask ..."
+  fancy_echo "Uninstalling old Homebrew-Cask..."
   brew uninstall --force brew-cask
 fi
 
 ###########################################################################
 ###################### 5. Installing Homebrew packages ####################
 
-fancy_echo "Updating Homebrew formulae ..."
+fancy_echo "Updating Homebrew..."
 brew update --quiet --force &>/dev/null
 brew bundle --quiet --file=Brewfile &>/dev/null
 
@@ -260,11 +258,11 @@ cp com.googlecode.iterm2.plist ~/Library/Preferences
 ###########################################################################
 ############### 7. Installing zsh-oh-my and updating shell ################
 
-fancy_echo "Installing zsh-oh-my ..."
+fancy_echo "Installing zsh-oh-my..."
 rm -rf ~/.oh-my-zsh
 git clone -q https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 
-fancy_echo "Copying .zshrc config ..."
+fancy_echo "Copying .zshrc config..."
 rm -rf ~/.zshrc
 cp zsh-template ~/.zshrc
 update_shell
