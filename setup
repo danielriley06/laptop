@@ -229,4 +229,6 @@ fi
 fancy_echo "Development environment installation complete! 🚀"
 fancy_echo "Follow steps at: https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/ to add your ssh key to github"
 
+fancy_echo "Opening iTerm and exiting...."
+open -a iTerm
 exit 0;
