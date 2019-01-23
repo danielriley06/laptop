@@ -20,6 +20,8 @@
 # shellcheck disable=SC2154
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
+TERMINAL=$(tty)
+
 
 shw_err ()  {
     echo $(tput bold)$(tput setaf 1) $@ $(tput sgr 0)
@@ -63,11 +65,11 @@ update_shell() {
 #Menu options
 options[0]="Ruby"
 options[1]="Node/Yarn"
-options[2]="Java"
-options[3]="Rust"
-options[4]="Python2"
-options[5]="Python3"
-options[6]="Go"
+options[2]="Rust"
+options[3]="Python2"
+options[4]="Python3"
+options[5]="Go"
+options[6]="Java"
 
 #Variables
 ERROR=" "
@@ -91,7 +93,7 @@ if [ ! -d "$HOME/.bin/" ]; then
   mkdir "$HOME/.bin"
 fi
 
-if [ -d "$HOME/.rbenv/"]; then
+if [ -d "$HOME/.rbenv/" ]; then
   rm -rf ~/.rbenv
 fi
 
@@ -252,28 +254,24 @@ function ACTIONS {
         fi
     fi
     if [[ ${choices[2]} ]]; then
-        #Option 2 selected
-        fancy_echo "Installing Java..."
-        brew cask install java
-    fi
-    if [[ ${choices[3]} ]]; then
-        #Option 3 selected
         fancy_echo "Installing Rust..."
         curl https://sh.rustup.rs -sSf | sh
     fi
     if [[ ${choices[3]} ]]; then
-        #Option 4 selected
         fancy_echo "Installing Python2..."
         brew install python@2
     fi
     if [[ ${choices[4]} ]]; then
-        #Option 5 selected
         fancy_echo "Installing Python3..."
         brew install python
     fi
     if [[ ${choices[5]} ]]; then
         fancy_echo "Installing Golang..."
         brew install golang
+    fi
+    if [[ ${choices[6]} ]]; then
+        fancy_echo "Installing Java..."
+        brew cask install java
     fi
 }
 
