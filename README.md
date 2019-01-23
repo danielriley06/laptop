@@ -21,7 +21,7 @@ Bug reports for older versions are welcome.
 Download the script:
 
 ```sh
-wget https://github.com/danielriley06/laptop/archive/master.zip -P ~ && unzip -a ~/master.zip && rm -rf ~/master.zip && cd laptop-master
+mkdir laptop && cd laptop && curl -L https://api.github.com/repos/danielriley06/laptop/tarball | tar xz --strip=1
 ```
 
 Review the script (avoid running scripts you haven't read!):
@@ -33,13 +33,7 @@ less setup
 Execute the downloaded script:
 
 ```bash
-bash setup 2>&1 | tee ~/setup.log
-```
-
-Optionally, review the log:
-
-```sh
-less ~/setup.log
+bash setup
 ```
 
 ## Debugging
