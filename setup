@@ -190,13 +190,13 @@ fi
 
 if type rbenv > /dev/null; then
   fancy_echo "Installing latest Ruby release (v$(rbenv install -l | grep -v - | tail -1))..."
-  rbenv install $(rbenv install -l | grep -v - | tail -1)
-  rbenv global $(rbenv install -l | grep -v - | tail -1)
-  rbenv rehash
+  #rbenv install $(rbenv install -l | grep -v - | tail -1)
+  #rbenv global $(rbenv install -l | grep -v - | tail -1)
+  #rbenv rehash
 
   fancy_echo "Configuring bundler globally ..."
-  number_of_cores=$(sysctl -n hw.ncpu)
-  bundle config --global jobs $((number_of_cores - 1))
+  #number_of_cores=$(sysctl -n hw.ncpu)
+  #bundle config --global jobs $((number_of_cores - 1))
 else
   fancy_echo "rbenv command not found!"
 fi
