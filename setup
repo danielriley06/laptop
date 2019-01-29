@@ -17,357 +17,137 @@
 ## 7. Installing selected optional packages and applications
 ## . Installing NVM, latest stable Node, and Yarn
 
-trap on_sigterm SIGKILL SIGTERM
+set -e
 
-On_Gray='\e[245m'
-
-export NEWT_COLORS="
-root=green,black
-border=green,black
-title=green,black
-roottext=white,black
-window=green,black
-
-textbox=white,black
-
-button=black,green
-compactbutton=white,black
-
-listbox=white,black
-
-actlistbox=black,white
-actsellistbox=black,green
-
-checkbox=green,black
-actcheckbox=black,green
-"
-
-shw_err ()  {
-    echo $(tput bold)$(tput setaf 1) $@ $(tput sgr 0)
-}
-
-fancy_echo() {
+say() {
   echo $(tput bold)$(tput setaf 2) $@ $(tput sgr 0)
 }
 
-fancy_logo() {
-  distro="macOS $(sw_vers -productVersion)"
-  kernel=$(uname)
-  shell="$SHELL"
-  terminal="$TERM ${TERM_PROGRAM//_/ }"
-  cpu=$(sysctl -n machdep.cpu.brand_string)
-  battery=$(ioreg -c AppleSmartBattery -r | awk '$1~/Capacity/{c[$1]=$3} END{OFMT="%.2f%"; max=c["\"MaxCapacity\""]; if (max>0) { print 100*c["\"CurrentCapacity\""]/max;} }')
-
-  # removes (R) and (TM) from the CPU name so it fits in a standard 80 window
-  cpu=$(echo "$cpu" | awk '$1=$1' | sed 's/([A-Z]\{1,2\})//g')
-
-  ram="$(( $(sysctl -n hw.memsize) / 1024 ** 3  )) GB"
-  disk=$(df | head -2 | tail -1 | awk '{print $5}')
-
-  RED=$(tput       setaf 1 2>/dev/null)
-  GREEN=$(tput     setaf 2 2>/dev/null)
-  YELLOW=$(tput    setaf 3 2>/dev/null)
-  BLUE=$(tput      setaf 4 2>/dev/null)
-  PURPLE=$(tput    setaf 5 2>/dev/null)
-  textColor=$(tput setaf 6 2>/dev/null)
-  normal=$(tput    sgr0 2>/dev/null)
-
-  fieldlist[${#fieldlist[@]}]="${textColor}User:${normal} ${user}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Hostname:${normal} ${hostname}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Distro:${normal} ${distro}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Kernel:${normal} ${kernel}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Uptime:${normal} ${uptime}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Shell:${normal} ${shell}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Terminal:${normal} ${terminal}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}CPU:${normal} ${cpu}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Memory:${normal} ${ram}${normal}"
-  fieldlist[${#fieldlist[@]}]="${textColor}Disk:${normal} ${disk}${normal}"
-  if [[ ! -z $battery ]]; then
-      fieldlist[${#fieldlist[@]}]="${textColor}Battery:${normal} ${battery}%${normal}"
-  fi
-
-  echo -e "
-  ${GREEN#  }                 ###               ${fieldlist[0]}
-  ${GREEN#  }               ####                ${fieldlist[1]}
-  ${GREEN#  }               ###                 ${fieldlist[2]}
-  ${GREEN#  }       #######    #######          ${fieldlist[3]}
-  ${YELLOW# }     ######################        ${fieldlist[4]}
-  ${YELLOW# }    #####################          ${fieldlist[5]}
-  ${RED#    }    ####################           ${fieldlist[6]}
-  ${RED#    }    ####################           ${fieldlist[7]}
-  ${RED#    }    #####################          ${fieldlist[8]}
-  ${PURPLE# }     ######################        ${fieldlist[9]}
-  ${PURPLE# }      ####################         ${fieldlist[10]}
-  ${BLUE#   }        ################           ${fieldlist[11]}
-  ${BLUE#   }         ####     #####            ${fieldlist[12]}
-  \n\n
-  ${normal}macOS Development Environment Installer
-  "
+error()  {
+    echo $(tput bold)$(tput setaf 1) $@ $(tput sgr 0)
 }
 
-append_to_zshrc() {
-  local text="$1" zshrc
-  local skip_new_line="${2:-0}"
-
-  if [ -w "$HOME/.zshrc.local" ]; then
-    zshrc="$HOME/.zshrc.local"
+InstallNode() {
+  if [[ -f "./modules/welcome.sh" ]]; then
+    source "./modules/welcome.sh"
   else
-    zshrc="$HOME/.zshrc"
+    error "FATAL: There was an issue with the script, try re-downloading!"
+    exit 1
   fi
 
-  if ! grep -Fqs "$text" "$zshrc"; then
-    if [ "$skip_new_line" -eq 1 ]; then
-      printf "%s\\n" "$text" >> "$zshrc"
-    else
-      printf "\\n%s\\n" "$text" >> "$zshrc"
-    fi
-  fi
+  InstallNvm
+  InstallNodeLatest
 }
 
-update_shell() {
-  local shell_path;
-  shell_path="$(command -v zsh)"
-
-  fancy_echo "Changing your shell to zsh..."
-  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
-    fancy_echo "Adding '$shell_path' to /etc/shells"
-    sudo sh -c "echo $shell_path >> /etc/shells"
-  fi
-  sudo chsh -s "$shell_path" "$USER" &1>/dev/null
+InstallYarn() {
+  say "Installing Yarn via Homebrew using nvm node install..."
+  brew install yarn --without-node &>/dev/null
 }
 
-# Install rbenv & rbenv-default-gems
-
-install_rbenv() {
-  fancy_echo "Installing rbenv..."
-  [brew install rbenv] &>/dev/null
-  fancy_echo "Validating rbenv install..."
-  curl -s -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | bash &>/dev/null
-
-  fancy_echo "Installing and configuring rbenv-default-gems plugin..."
-  rm -rf $HOME/.rbenv/plugins/rbenv-default-gems
-  rm -rf $HOME/.rbenv/default-gems
-  git clone https://github.com/rbenv/rbenv-default-gems.git $HOME/.rbenv/plugins/rbenv-default-gems &>/dev/null
-  touch $HOME/.rbenv/default-gems
-  echo "bundler" >> $HOME/.rbenv/default-gems
-  echo "rails" >> $HOME/.rbenv/default-gems
-
-  if type rbenv > /dev/null; then
-    fancy_echo "Installing latest Ruby release (v$(rbenv install -l | grep -v - | tail -1))..."
-    rbenv install $(rbenv install -l | grep -v - | tail -1) &>/dev/null
-    ret_code=$?
-    rbenv global $(rbenv install -l | grep -v - | tail -1)
-    rbenv rehash
-
-    fancy_echo "Configuring bundler globally..."
-    number_of_cores=$(sysctl -n hw.ncpu)
-    bundle config --global jobs $((number_of_cores - 1))
+BootstrapRuby() {
+  if [[ -s "./modules/ruby.sh" ]]; then
+    source "./modules/ruby.sh"
   else
-    fancy_echo "rbenv command not found!"
-  fi
-}
-
-# Install NVM/Node/Yarn
-
-install_node() {
-  fancy_echo "Installing nvm..."
-  if [ -d "$HOME/.nvm/" ]; then
-    shw_err "sudo password required to ensure clean NVM installation:"
-    sudo rm -rf ~/.nvm ~/.npm ~/.bower # Ensures fresh NVM install
+    error "FATAL: There was an issue with the script, try re-downloading!"
+    exit 1
   fi
 
-  mkdir "$HOME/.nvm/"
-
-  curl -s -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash &>/dev/null
-  append_to_zshrc "export NVM_DIR="$HOME/.nvm""
-  append_to_zshrc "[ -s "$NVM_DIR/nvm.sh" ] && \. '$NVM_DIR/nvm.sh' # This loads nvm"
-  source ~/.nvm/nvm.sh
-    fancy_echo "Installing Node..."
-    nvm install node &> /dev/null
-
-    fancy_echo "Installing Yarn via Homebrew using nvm node install..."
-    [ brew install yarn --without-node ] &>/dev/null
-
-    fancy_echo "Installing Pure prompt..."
-    npm install --global pure-prompt &>/dev/null
-    append_to_zshrc "autoload -U promptinit; promptinit"
-    append_to_zshrc "prompt pure"
+  InstallRbenv
+  GenerateGemrc
+  InstallDefaultGemDependencies
+  InstallRubyLatest
 }
 
-###########################################################################
-################## 1. Create installation directories #####################
-
-clear
-fancy_logo
-
-if [ ! -d "$HOME/.bin/" ]; then
-  mkdir "$HOME/.bin"
-fi
-
-if [ -d "$HOME/.rbenv/" ]; then
-  rm -rf ~/.rbenv
-fi
-
-
-###########################################################################
-################## 3. Create .gemrc config for ruby gems ##################
-
-  if [ ! -f "$HOME/.gemrc" ]; then
-    fancy_echo "Creating empty ruby gem config dotfile..."
-    touch "$HOME/.gemrc"
-    fancy_echo "Adding gem config default settings..."
-    cp gemrc-template ~/.gemrc
+BootstrapHomebrew() {
+  if command -v brew > /dev/null 2>&1; then
+    say "Installing Homebrew..."
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   else
-    fancy_echo "Adding gem config default settings..."
-    cp gemrc-template ~/.gemrc
+    say "Reinstalling Homebrew..."
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall)" > /dev/null 2>&1
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" > /dev/null 2>&1
   fi
+}
 
-###########################################################################
-########################## 4. Installing Homebrew #########################
+BootstrapPrezto() {
+  say "Installing Prezto..."
+  zsh
+  git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
 
-if ! [ -x "$(command -v brew)" ]; then
-  fancy_echo "Installing Homebrew..."
-    curl -fsS 'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby &>/dev/null
-
-    append_to_zshrc '# recommended by brew doctor'
-
-    # shellcheck disable=SC2016
-    append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
-
-    export PATH="/usr/local/bin:$PATH"
-fi
-
-if [ brew list &>/dev/null | grep -Fq brew-cask &>/dev/null ]; then
-  fancy_echo "Uninstalling old Homebrew-Cask..."
-  brew uninstall --force brew-cask
-fi
-
-###########################################################################
-###################### 5. Installing Homebrew packages ####################
-
-fancy_echo "Updating Homebrew..."
-brew update --quiet --force &>/dev/null
-brew bundle --quiet --file=Brewfile &>/dev/null
-
-###########################################################################
-###################### 6. Homebrew package postinstall ####################
-
-rm -rf ~/Library/Preferences/com.googlecode.iterm2.plist
-cp com.googlecode.iterm2.plist ~/Library/Preferences
-
-
-###########################################################################
-############### 7. Installing zsh-oh-my and updating shell ################
-
-fancy_echo "Installing zsh-oh-my..."
-rm -rf ~/.oh-my-zsh
-git clone -q https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
-
-fancy_echo "Copying .zshrc config..."
-rm -rf ~/.zshrc
-cp zsh-template ~/.zshrc
-update_shell
-
-#############################################################################
-######### 8. Installing selected optional packages and applications #########
-
-
-TERMINAL=$(tty)
-
-HEIGHT=30
-WIDTH=80
-CHOICE_HEIGHT=15
-TITLE="macOS Development Environment Installer"
-MENU="Select one or more options with SPACE and confirm with TAB:"
-
-OPTIONS=(
-  1 "Ruby"        on
-  2 "Node/Yarn"   on
-  3 "Typescript"  on
-  4 "Rust"        off
-  5 "Python2"     off
-  6 "Python3"     off
-  7 "Go"          off
-  8 "Java"        off
-  9 "iTerm2"      off
-  10 "VS Code"    off
-)
-
-CHOICES=$(whiptail --cancel-button "Exit" \
-                --ok-button "Begin" \
-                --separate-output \
-                --backtitle "$BACKTITLE" \
-                --title "$TITLE" \
-                --checklist "$MENU" \
-                $HEIGHT $WIDTH $CHOICE_HEIGHT \
-                "${OPTIONS[@]}" 3>&1 1>&2 2>&3)
-EXIT_CODE=$?
-
-if [ "1" = "$EXIT_CODE" ] ; then
-  clear
-  fancy_echo "Cancelled..."
-  fancy_echo "Development environment installation complete! 🚀"
-  exit 0;
-fi
-
-if [ "255" = "$EXIT_CODE" ] ; then
-  clear
-  fancy_echo "Cancelled..."
-  fancy_echo "Development environment installation complete! 🚀"
-  exit 0;
-fi
-
-if [[ -z "$CHOICES" ]]; then
-  clear
-  fancy_echo "No options were selected..."
-  fancy_echo "Development environment installation complete! 🚀"
-  exit 0;
-else
-  for choice in $CHOICES
-  do
-    case $choice in
-      1)
-          install_rbenv
-          ;;
-      2)
-          install_node
-          ;;
-      3)
-          npm install --global typescript &>/dev/null
-          ;;
-      4)
-          fancy_echo "Installing Rust..."
-          curl https://sh.rustup.rs -sSf | sh &>/dev/null
-          ;;
-      5)
-          fancy_echo "Installing Python2..."
-          [ brew install python@2 ] &>/dev/null
-          ;;
-      6)
-          fancy_echo "Installing Pythong3..."
-          [ brew install python ] &>/dev/null
-          ;;
-      7)
-          fancy_echo "Installing Golang..."
-          [ brew install golang ] &>/dev/null
-          ;;
-      8)
-          fancy_echo "Installing Java..."
-          [ brew cask install java ] &>/dev/null
-          ;;
-      9)
-          fancy_echo "Installing iTerm 2..."
-          [ brew cask install iterm2-nightly ] &>/dev/null
-          curl --silent -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash &>/dev/null
-          ;;
-      10)
-          fancy_echo "Installing Visual Studio Code..."
-          [ brew cask install visual-studio-code ] &>/dev/null
-          open -a Visual\ Studio\ Code.app
-          ;;
-    esac
+  say "Copying Prezto provided Zsh configuration files..."
+  setopt EXTENDED_GLOB
+  for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do
+    ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"
   done
-fi
+  chsh -s /bin/zsh
 
-fancy_echo "Follow steps at: https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/ to add your ssh key to github"
-fancy_echo "Development environment installation complete! 🚀"
+  cp pretzo.env.sh ~/pretzo.env.sh
+}
+
+BootstrapGit() {
+  brew install git
+  git config --global user.name "Your Name Here"
+  git config --global user.email "your_email@youremail.com"
+  git config --global credential.helper osxkeychain
+}
+
+BootstrapRust() {
+  say "Installing Rust..."
+  brew install rustup
+  rustup-init
+}
+
+BootstrapPython2() {
+  say "Installing Python2..."
+  [ brew install python@2 ] &>/dev/null
+}
+
+BootstrapPython3() {
+  say "Installing Python3..."
+  [ brew install python@3 ] &>/dev/null
+}
+
+BootstrapGolang() {
+  say "Installing Golang..."
+  [ brew install golang ] &>/dev/null
+}
+
+BootstrapJava() {
+  say "Installing Java..."
+  [ brew cask install java ] &>/dev/null
+}
+
+BootstrapScala() {
+  say "Installing Scala..."
+  brew install scala sbt
+}
+
+InstallIterm2() {
+  say "Installing iTerm 2..."
+  [ brew cask install iterm2-nightly ] &>/dev/null
+  curl --silent -L https://iterm2.com/shell_integration/install_shell_integration_and_utilities.sh | bash &>/dev/null
+}
+
+InstallVisualStudioCode() {
+  say "Installing Visual Studio Code..."
+  [ brew cask install visual-studio-code ] &>/dev/null
+
+}
+
+runSetup() {
+  if [[ -f "./modules/install_dialog.sh" ]]; then
+    ./modules/install_dialog.sh
+  else
+    error "FATAL: There was an issue with the script, try re-downloading!"
+    exit 1
+  fi
+}
+
+read -p "This script will overwrite existing files in your home directory. Are you sure? (y/n) " -n 1;
+echo "";
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    runSetup $@
+fi;
+
+unset runSetup;
+
